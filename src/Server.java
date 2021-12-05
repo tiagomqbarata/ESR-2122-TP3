@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Server {
@@ -47,7 +48,7 @@ public class Server {
                     e.printStackTrace();
                 }
 
-                System.out.println(new String(messageReceived));
+                System.out.println(new String(ott.trim(messageReceived)));
                 System.out.println(pacote.getAddress().getHostAddress());
                 System.out.println(pacote.getPort());
 

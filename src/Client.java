@@ -1,7 +1,5 @@
-import java.awt.*;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 
 public class Client {
     private InetAddress ipServer;
@@ -25,8 +23,6 @@ public class Client {
             e.printStackTrace();
         }
 
-        System.out.println(ipServer);
-
         try {
             socket.send(new DatagramPacket("HELLO".getBytes(), "HELLO".length(), ipServer, portServer));
         } catch (IOException e) {
@@ -42,7 +38,7 @@ public class Client {
             e.printStackTrace();
         }
 
-        System.out.println(new String(messageReceived));
+        System.out.println(new String(ott.trim(messageReceived)));
 
     }
 }
