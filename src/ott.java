@@ -11,7 +11,7 @@ public class ott {
                         c.run();
                         break;
             case "-r": // encaminhadores - recebem pacotes e encaminham de acordo com o destino e a sua tabela de rotas
-
+                        Router r = new Router();
                         break;
         }
     }
