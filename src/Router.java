@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /*
+    TODO - LER ESTA PORRA QUE DEU TRABALHO FAZER/PENSAR
    enunciado resumido:
        servidor vai enviar mensagem de controlo para criar rotas - inclui identificação do servidor, identificação do fluxo, valor da métrica, etc;
        cada nó deve atualizar a tabela de rotas com: Servidor/Fluxo, Origem, Métrica, Destinos, Estado da Rota;
@@ -32,12 +33,13 @@ public class Router {
     private List<Rota> routing_table;
     private DatagramSocket socket;
 
-    public Router() {
+    public Router(List<String> vizinhos) {
+        this.vizinhos = vizinhos;
         this.routing_table = new ArrayList<>();
     }
 
     public void addRoute(InetAddress servidor, int porta_servidor, String origem, int saltos){
-        this.routing_table.add(new Rota(servidor,porta_servidor,origem,saltos,vizinhos));
+        this.routing_table.add(new Rota(servidor,porta_servidor,origem,saltos,this.vizinhos));
     }
 
     public void addRoute(Rota rota){
@@ -57,7 +59,7 @@ public class Router {
                 }
 
                 String data = Arrays.toString(pacote.getData());
-                //dependendo do formato da mensagem, tratar os dados e adicionar rota
+                //TODO - dependendo do formato da mensagem, tratar os dados e adicionar rota
 
                 /* reencaminhar a mensagem para todos os vizinhos, não esquecer adicionar um salto à métrica
                 try {

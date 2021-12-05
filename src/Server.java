@@ -2,13 +2,17 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Random;
 
 public class Server {
     private int port;
     private DatagramSocket socket;
+    private Map<InetAddress,Integer> vizinhos;
 
-    public Server(){
+    public Server(Map<InetAddress,Integer> vizinhos){
+        this.vizinhos = vizinhos;
+
         port = 51510;
 
         try {
@@ -18,6 +22,7 @@ public class Server {
         }
 
         try {
+            //TODO - enviar mensagem para todos os vizinhos com cenas da rota
             System.out.println("Ativo em " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
         } catch (UnknownHostException e) {
             e.printStackTrace();

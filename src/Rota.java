@@ -8,13 +8,12 @@ public class Rota {
     private int porta_servidor;
     private String origem;
     private int saltos;
-    private List<String> destinos = new ArrayList<>(); //vizinhos?
+    private List<String> destinos = new ArrayList<>(); //TODO - vizinhos?
     private int estado; //0 - inativa; 1 - ativa
 
-    /*
+    /* TODO - checkar esta classe
     identificação do servidor, identificação do fluxo, valor da métrica, etc;
     cada nó deve atualizar a tabela de rotas com: Servidor/Fluxo, Origem, Métrica, Destinos, Estado da Rota
-
      */
 
     public Rota(InetAddress servidor, int porta_servidor, String origem, int saltos, List<String> destinos){
