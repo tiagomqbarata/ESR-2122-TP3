@@ -2,9 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /*
     TODO - LER ESTA PORRA QUE DEU TRABALHO FAZER/PENSAR
@@ -29,21 +27,33 @@ import java.util.List;
    */
 
 public class Router {
-    private List<String> vizinhos;
-    private List<Rota> routing_table;
+    private Map<InetAddress, Integer> vizinhos;
+    private Map<InetAddress, Rota> routing_table;
+    private InetAddress ipServidor;
     private DatagramSocket socket;
 
-    public Router(List<String> vizinhos) {
+    public Router(Map<InetAddress, Integer> vizinhos) {
         this.vizinhos = vizinhos;
-        this.routing_table = new ArrayList<>();
+        this.routing_table = new TreeMap<>();
     }
 
-    public void addRoute(InetAddress servidor, int porta_servidor, String origem, int saltos){
-        this.routing_table.add(new Rota(servidor,porta_servidor,origem,saltos,this.vizinhos));
+    public boolean addRoute(InetAddress ip, int porta, InetAddress origem, int saltos){
+        Rota r = routing_table.get(ip);
+        if(r == null || saltos < r.getSaltos()){
+            r = new Rota(porta, origem, saltos);
+            routing_table.put(ip,r);
+
+            return true;
+        }
+        return false;
+    }
+
+    public void addServidor(InetAddress ipServidor){
+        this.ipServidor = ipServidor;
     }
 
     public void addRoute(Rota rota){
-        this.routing_table.add(rota);
+    //    this.routing_table.add(rota);
     }
 
     public void run(){

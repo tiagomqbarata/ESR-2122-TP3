@@ -7,38 +7,44 @@ import java.util.Map;
 
 public class ott {
     public static void main(String[] args) {
-        List<String> vizinhos;
+        Map<InetAddress, Integer> vizinhosMap = new HashMap<>();
 
         switch (args[0]) {
             case "-s" -> {  //TODO - checkar cena dos maps de ips->portas
-                            vizinhos = Arrays.stream(args[1].split(",")).toList();
-                            Map<InetAddress, Integer> ip_vizinhos = new HashMap<>();
-                            vizinhos.forEach(vizinho -> {
+                            for(int i = 1; i<args.length; i++){
+                                String [] content = args[i].split(":");
                                 try {
-                                    ip_vizinhos.put(InetAddress.getByName(vizinho.split(":")[0]), Integer.parseInt(vizinho.split(":")[1]));
+                                    vizinhosMap.put(InetAddress.getByName(content[0]), Integer.parseInt(content[1]));
                                 } catch (UnknownHostException e) {
                                     e.printStackTrace();
                                 }
-                            });
-                            Server s = new Server(ip_vizinhos);
+                            }
+
+                            Server s = new Server(vizinhosMap);
                             s.run();
             }
             case "-c" -> {
-                            vizinhos = Arrays.stream(args[1].split(",")).toList();
-                            Map<InetAddress, Integer> ip_vizinhos = new HashMap<>();
-                            vizinhos.forEach(vizinho -> {
+                            for(int i = 1; i<args.length; i++){
+                                String [] content = args[i].split(":");
                                 try {
-                                    ip_vizinhos.put(InetAddress.getByName(vizinho.split(":")[0]), Integer.parseInt(vizinho.split(":")[1]));
+                                    vizinhosMap.put(InetAddress.getByName(content[0]), Integer.parseInt(content[1]));
                                 } catch (UnknownHostException e) {
                                     e.printStackTrace();
                                 }
-                            });
-                            Client c = new Client(ip_vizinhos);
+                            }
+                            Client c = new Client(vizinhosMap);
                             c.run();
             }
             case "-r" -> {  // encaminhadores - recebem pacotes e encaminham de acordo com o destino e a sua tabela de rotas
-                            vizinhos = Arrays.stream(args[1].split(",")).toList();
-                            Router r = new Router(vizinhos);
+                            for(int i = 1; i<args.length; i++){
+                                String [] content = args[i].split(":");
+                                try {
+                                    vizinhosMap.put(InetAddress.getByName(content[0]), Integer.parseInt(content[1]));
+                                } catch (UnknownHostException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            Router r = new Router(vizinhosMap);
             }
         }
     }
