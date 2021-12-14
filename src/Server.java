@@ -48,7 +48,7 @@ public class Server {
                 byte[] messageReceived = new byte[512];
                 DatagramPacket pacote = new DatagramPacket(messageReceived,512);
 
-                try {
+                try {//TODO - passar para tcp
                     socket.receive(pacote);
                 } catch (IOException e) {
                     e.printStackTrace();

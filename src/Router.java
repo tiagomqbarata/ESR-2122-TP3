@@ -67,6 +67,7 @@ public class Router {
                                 this.vizinhos.forEach(vizinho -> {
                                     DatagramPacket packet = new DatagramPacket(msg.toBytes(), msg.length(), vizinho, port);
                                     try {
+                                        //TODO - passar para tcp
                                         socket.send(packet);
                                     } catch (IOException e) {
                                         e.printStackTrace();
@@ -80,6 +81,7 @@ public class Router {
                             msg.incSaltos();
                             DatagramPacket p = new DatagramPacket(msg.toBytes(), msg.length(), this.routing_table.get(ipServidor).getOrigem(), port);
                             try {
+                                //TODO - passar para tcp
                                 socket.send(p);
                             } catch (IOException e) {
                                 e.printStackTrace();
