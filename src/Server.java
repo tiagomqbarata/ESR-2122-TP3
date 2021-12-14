@@ -2,18 +2,17 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 public class Server {
-    private int port;
     private DatagramSocket socket;
-    private Map<InetAddress,Integer> vizinhos;
+    private static final int port = 12345;
+    private List<InetAddress> vizinhos;
 
-    public Server(Map<InetAddress,Integer> vizinhos){
+    public Server(List<InetAddress> vizinhos){
         this.vizinhos = vizinhos;
-
-        port = 51510;
 
         try {
             socket = new DatagramSocket(port);
@@ -21,26 +20,21 @@ public class Server {
             e.printStackTrace();
         }
 
-        try {
-            //TODO - enviar mensagem para todos os vizinhos com cenas da rota
-            System.out.println("Ativo em " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-    }
-/*
-    public void run() {
-        new Thread(() -> {
-            while (true) {
-                Socket socket = null;
-                try {
-                    socket = serverSocket.accept();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        Mensagem m = new Mensagem("r");
+
+        for(InetAddress addr : vizinhos){
+            DatagramPacket packet = new DatagramPacket(m.toBytes(),m.length(), addr, port);
+            try {
+                socket.send(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }).start();
-*/
+        }
+
+        System.out.println("Mensagens enviadas...");
+
+    }
+
     public void run(){
         new Thread(() -> {
             while (true){
@@ -53,15 +47,16 @@ public class Server {
                     e.printStackTrace();
                 }
 
+                // Mensagem recebida
                 System.out.println(new String(ott.trim(messageReceived)));
+
+                // IP de onde veio a mensagem (proximo salto para a stream)
                 System.out.println(pacote.getAddress().getHostAddress());
+
+                // Porta de onde veio a mensagem (sempre '12345')
                 System.out.println(pacote.getPort());
 
-                try {
-                    socket.send(new DatagramPacket("HELLO RECEIVED".getBytes(), "HELLO RECEIVED".length(), pacote.getAddress(), pacote.getPort()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+               //TODO - FAZER A STREAM AQUI
             }
         }).start();
 

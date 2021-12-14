@@ -3,25 +3,24 @@ import java.util.*;
 
 public class Rota {
     private InetAddress servidor;
-    private int portaOrigem;
+    private static final int porta = 12345;
     private InetAddress origem;
     private int saltos;
     private int estado; //0 - inativa; 1 - ativa
 
-    /* TODO - checkar esta classe
+    /*
     identificação do servidor, identificação do fluxo, valor da métrica, etc;
     cada nó deve atualizar a tabela de rotas com: Servidor/Fluxo, Origem, Métrica, Destinos, Estado da Rota
      */
 
-    public Rota(int porta, InetAddress origem, int saltos){
-        this.portaOrigem = porta;
+    public Rota(InetAddress origem, int saltos){
         this.origem = origem;
         this.saltos = saltos;
         this.estado = 0;
     }
 
     public InetAddress getServidor() {
-        return servidor;
+        return this.servidor;
     }
 
     public void setServidor(InetAddress servidor) {
@@ -29,15 +28,11 @@ public class Rota {
     }
 
     public int getPortaOrigem() {
-        return portaOrigem;
-    }
-
-    public void setPortaOrigem(int portaOrigem) {
-        this.portaOrigem = portaOrigem;
+        return this.porta;
     }
 
     public InetAddress getOrigem() {
-        return origem;
+        return this.origem;
     }
 
     public void setOrigem(InetAddress origem) {
@@ -45,7 +40,7 @@ public class Rota {
     }
 
     public int getSaltos() {
-        return saltos;
+        return this.saltos;
     }
 
     public void setSaltos(int saltos) {
@@ -53,7 +48,7 @@ public class Rota {
     }
 
     public int getEstado() {
-        return estado;
+        return this.estado;
     }
 
     public void setEstado(int estado) {
