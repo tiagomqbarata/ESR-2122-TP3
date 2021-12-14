@@ -5,6 +5,11 @@ import java.util.*;
 public class ott {
     public static void main(String[] args) {
 
+        try {
+            System.out.println(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
 
         switch (args[0]) {
             case "-s" -> {

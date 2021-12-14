@@ -4,7 +4,7 @@ import java.util.*;
 public class Rota {
     private InetAddress servidor;
     private static final int porta = 12345;
-    private InetAddress origem;
+    private InetAddress origem; //
     private int saltos;
     private int estado; //0 - inativa; 1 - ativa
 

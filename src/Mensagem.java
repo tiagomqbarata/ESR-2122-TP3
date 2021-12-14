@@ -1,20 +1,14 @@
 import java.net.InetAddress;
 
 public class Mensagem {
-    private String tipo;
+    private String tipo; //r - reconhecimento; ar - ativação de rota; sr - saltos de rota
     private int saltos;
-    private InetAddress ipServidor;
+    private InetAddress ipOrigemMensagem;
 
-    public Mensagem(String tipo, InetAddress ip){
+    public Mensagem(String tipo, InetAddress ipOrigemMensagem){
         this.tipo = tipo;
         this.saltos = 1;
-        this.ipServidor = ip;
-    }
-
-    public Mensagem(String tipo){
-        this.tipo = tipo;
-        this.saltos = 1;
-        this.ipServidor = null;
+        this.ipOrigemMensagem = ipOrigemMensagem;
     }
 
     public Mensagem(byte[] data){ //ISTO É LINDO, OBRIGADO!!!!!!
@@ -45,8 +39,8 @@ public class Mensagem {
         return saltos;
     }
 
-    public InetAddress getIpServidor(){
-        return this.ipServidor;
+    public InetAddress getIpOrigemMensagem(){
+        return this.ipOrigemMensagem;
     }
 
     public String toString(){

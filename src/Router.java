@@ -1,8 +1,9 @@
 import javax.swing.*;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.*;
 import java.util.*;
 
 public class Router {
@@ -11,12 +12,24 @@ public class Router {
     private Map<InetAddress, Rota> routing_table;
     private InetAddress ipServidor;
     private DatagramSocket socket;
+    private ServerSocket serverSocket;
+    private Socket tcpSocket;
+    private DataInputStream in;
+    private DataOutputStream out;
     private int ligados;
+    private InetAddress myIp;
 
     public Router(List<InetAddress> vizinhos) {
         this.vizinhos = vizinhos;
         this.ligados = 0;
         this.routing_table = new HashMap<>();
+        try {
+            this.myIp = InetAddress.getLocalHost();
+            this.socket = new DatagramSocket(port);
+            this.serverSocket = new ServerSocket();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean addRota(InetAddress destino, InetAddress origem, int saltos){
@@ -33,49 +46,53 @@ public class Router {
         this.ipServidor = ipServidor;
     }
 
-    public void addRota(Rota rota){
-        this.routing_table.put(rota.getOrigem(),rota);
-    }
-
     public void run(){
         new Thread(() -> {
-            while (true){
+            while (true) {
                 byte[] messageReceived = new byte[512];
-                DatagramPacket pacote = new DatagramPacket(messageReceived,512);
 
                 try {
-                    socket.receive(pacote);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    tcpSocket = serverSocket.accept();
+                    in = new DataInputStream(new BufferedInputStream(tcpSocket.getInputStream()));
 
-                //TODO - encaminhar, dependendo do formato da mensagem, tratar os dados e adicionar a rota
-                Mensagem msg = new Mensagem(pacote.getData());
-                switch(msg.getTipo()){
-                    case "r" -> {
-                        this.ipServidor = msg.getIpServidor();
-                        this.routing_table.put(this.ipServidor,new Rota(this.ipServidor,msg.getSaltos()));
-                        msg.incSaltos();
-                        this.vizinhos.forEach(vizinho -> {
-                            DatagramPacket packet = new DatagramPacket(msg.toBytes(), msg.length(), vizinho, port);
+                    in.read(messageReceived);
+                    Mensagem msg = new Mensagem(ott.trim(messageReceived));
+
+                    //TODO - encaminhar, dependendo do formato da mensagem, tratar os dados e adicionar a rota
+                    switch (msg.getTipo()) {
+                        case "r" -> {
+                            this.ipServidor = msg.getIpOrigemMensagem();
+                            if (this.addRota(this.ipServidor, this.ipServidor, msg.getSaltos())) {
+                                msg.incSaltos();
+                                this.vizinhos.forEach(vizinho -> {
+                                    DatagramPacket packet = new DatagramPacket(msg.toBytes(), msg.length(), vizinho, port);
+                                    try {
+                                        socket.send(packet);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            }
+                        }
+                        case "ar" -> {
+                            this.addRota(msg.getIpOrigemMensagem(), ((InetSocketAddress)tcpSocket.getRemoteSocketAddress()).getAddress(), msg.getSaltos());
+                            this.ligados++;
+                            msg.incSaltos();
+                            DatagramPacket p = new DatagramPacket(msg.toBytes(), msg.length(), this.routing_table.get(ipServidor).getOrigem(), port);
                             try {
-                                socket.send(packet);
+                                socket.send(p);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        });
+
+                            //TODO - pedido de conteúdo
+                        }
+                        case "" -> { //caso da mensagem de "fecho de rota"
+
+                        }
                     }
-                    case "ar" -> {
-                        Rota rota = new Rota(pacote.getAddress(),msg.getSaltos());
-                        this.routing_table.put(pacote.getAddress(),rota);
-                        this.addRota(pacote.getAddress(),);
-                        this.ligados++;
-                        msg.incSaltos();
-                        for
-                        DatagramPacket packet = new DatagramPacket(msg.toBytes(),msg.length(),)
-                        socket.send();
-                        //TODO - pedido de conteúdo
-                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }).start();

@@ -8,27 +8,34 @@ import java.util.Random;
 
 public class Server {
     private DatagramSocket socket;
+    private List<Socket> tcpSockets;
+    private DataInputStream in;
+    private DataOutputStream out;
     private static final int port = 12345;
     private List<InetAddress> vizinhos;
+    private InetAddress myIp;
 
     public Server(List<InetAddress> vizinhos){
         this.vizinhos = vizinhos;
-
         try {
-            socket = new DatagramSocket(port);
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+            this.myIp = InetAddress.getLocalHost();
+            this.socket = new DatagramSocket(port);
 
-        Mensagem m = new Mensagem("r");
+            Mensagem m = new Mensagem("r", myIp);
 
-        for(InetAddress addr : vizinhos){
-            DatagramPacket packet = new DatagramPacket(m.toBytes(),m.length(), addr, port);
-            try {
-                socket.send(packet);
-            } catch (IOException e) {
-                e.printStackTrace();
+            for(InetAddress vizinho : vizinhos) {
+                //DatagramPacket packet = new DatagramPacket(m.toBytes(), m.length(), vizinho, port);
+                //socket.send(packet);
+                // TODO - checkar envio tcp
+                this.tcpSockets.add(new Socket(vizinho,port));
+                for (Socket socket: tcpSockets) {
+                    out = new DataOutputStream(socket.getOutputStream());
+                    out.write(m.toBytes());
+                    out.flush();
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         System.out.println("Mensagens enviadas...");
@@ -46,17 +53,25 @@ public class Server {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                Mensagem m = new Mensagem(messageReceived);
 
-                // Mensagem recebida
-                System.out.println(new String(ott.trim(messageReceived)));
+                switch (m.getTipo()) {
+                    case "ar" -> {
+                        // Mensagem recebida
+                        System.out.println(new String(ott.trim(messageReceived)));
 
-                // IP de onde veio a mensagem (proximo salto para a stream)
-                System.out.println(pacote.getAddress().getHostAddress());
+                        // IP de onde veio a mensagem (proximo salto para a stream)
+                        System.out.println(pacote.getAddress().getHostAddress());
 
-                // Porta de onde veio a mensagem (sempre '12345')
-                System.out.println(pacote.getPort());
+                        // Porta de onde veio a mensagem (sempre '12345')
+                        System.out.println(pacote.getPort());
 
-               //TODO - FAZER A STREAM AQUI
+                        //TODO - FAZER A STREAM AQUI
+                    }
+                    case "" -> { //caso da mensagem de "fecho de rota"
+
+                    }
+                }
             }
         }).start();
 
