@@ -1,16 +1,9 @@
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 public class Server {
     private DatagramSocket socket;
-    private List<Socket> tcpSockets;
-    private DataInputStream in;
-    private DataOutputStream out;
     private static final int port = 12345;
     private List<InetAddress> vizinhos;
     private InetAddress myIp;
@@ -20,35 +13,52 @@ public class Server {
         try {
             this.myIp = InetAddress.getLocalHost();
             this.socket = new DatagramSocket(port);
-
-            Mensagem m = new Mensagem("r", myIp);
-
-            for(InetAddress vizinho : vizinhos) {
-                //DatagramPacket packet = new DatagramPacket(m.toBytes(), m.length(), vizinho, port);
-                //socket.send(packet);
-                // TODO - checkar envio tcp
-                this.tcpSockets.add(new Socket(vizinho,port));
-                for (Socket socket: tcpSockets) {
-                    out = new DataOutputStream(socket.getOutputStream());
-                    out.write(m.toBytes());
-                    out.flush();
-                }
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        System.out.println("Mensagens enviadas...");
-
     }
 
     public void run(){
-        new Thread(() -> {
+        /**
+         * Envio de mensagem de resposta dos vizinhos, via tcp
+         * */
+        for(InetAddress vizinho : vizinhos) {
+            new Thread(() -> {
+                Mensagem m = new Mensagem("r", myIp);
+                try {
+                    Socket vizinhoSocket = new Socket(vizinho,port);
+                    DataOutputStream out = new DataOutputStream(new BufferedOutputStream(vizinhoSocket.getOutputStream()));
+                    DataInputStream in = new DataInputStream(new BufferedInputStream(vizinhoSocket.getInputStream()));
+
+                    out.write(m.toBytes());
+                    out.flush();
+
+                    byte[] data = new byte[512];
+                    in.read(data);
+
+                    Mensagem pedido = new Mensagem(data);
+
+                    //TODO - Responder ao pedido
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+            }).start();
+        }
+
+        /**
+         * Espera de pedidos UDP
+         * */
+/*        new Thread(() -> {
             while (true){
                 byte[] messageReceived = new byte[512];
                 DatagramPacket pacote = new DatagramPacket(messageReceived,512);
 
-                try {//TODO - passar para tcp
+                try {
                     socket.receive(pacote);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -59,13 +69,6 @@ public class Server {
                     case "ar" -> {
                         // Mensagem recebida
                         System.out.println(new String(ott.trim(messageReceived)));
-
-                        // IP de onde veio a mensagem (proximo salto para a stream)
-                        System.out.println(pacote.getAddress().getHostAddress());
-
-                        // Porta de onde veio a mensagem (sempre '12345')
-                        System.out.println(pacote.getPort());
-
                         //TODO - FAZER A STREAM AQUI
                     }
                     case "" -> { //caso da mensagem de "fecho de rota"
@@ -74,7 +77,7 @@ public class Server {
                 }
             }
         }).start();
-
+*/
     }
 }
 

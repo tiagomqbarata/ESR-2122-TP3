@@ -26,7 +26,7 @@ public class Router {
         try {
             this.myIp = InetAddress.getLocalHost();
             this.socket = new DatagramSocket(port);
-            this.serverSocket = new ServerSocket();
+            this.serverSocket = new ServerSocket(port);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -65,10 +65,9 @@ public class Router {
                             if (this.addRota(this.ipServidor, this.ipServidor, msg.getSaltos())) {
                                 msg.incSaltos();
                                 this.vizinhos.forEach(vizinho -> {
-                                    DatagramPacket packet = new DatagramPacket(msg.toBytes(), msg.length(), vizinho, port);
                                     try {
-                                        //TODO - passar para tcp
-                                        socket.send(packet);
+                                        out.write(msg.toBytes());
+                                        out.flush();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -79,10 +78,9 @@ public class Router {
                             this.addRota(msg.getIpOrigemMensagem(), ((InetSocketAddress)tcpSocket.getRemoteSocketAddress()).getAddress(), msg.getSaltos());
                             this.ligados++;
                             msg.incSaltos();
-                            DatagramPacket p = new DatagramPacket(msg.toBytes(), msg.length(), this.routing_table.get(ipServidor).getOrigem(), port);
                             try {
-                                //TODO - passar para tcp
-                                socket.send(p);
+                                out.write(msg.toBytes());
+                                out.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

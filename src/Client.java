@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Client {
     private static final int port = 12345;
-    private DatagramSocket socket;
+  //  private DatagramSocket socket;
     private Socket tcpSocket;
     private DataInputStream in;
     private DataOutputStream out;
@@ -17,7 +17,7 @@ public class Client {
         this.vizinho = vizinho;
         try {
             this.myIp = InetAddress.getLocalHost();
-            this.socket = new DatagramSocket(port);
+         //   this.socket = new DatagramSocket(port);
             this.tcpSocket = new Socket(vizinho,port);
 
             Mensagem m = new Mensagem("ar", myIp);
@@ -27,6 +27,7 @@ public class Client {
 
             this.tcpSocket = new Socket(vizinho,port);
             out = new DataOutputStream(tcpSocket.getOutputStream());
+            in = new DataInputStream(tcpSocket.getInputStream());
             out.write(m.toBytes());
             out.flush();
         } catch (IOException e) {
@@ -36,23 +37,21 @@ public class Client {
         System.out.println("Pedido de ativacao da rota enviado...");
 
         byte[] data = new byte[512];
-        DatagramPacket p =  new DatagramPacket(data,data.length);
         try {
-            socket.receive(p);
+            in.read(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Mensagem m = new Mensagem(p.getData());
+        Mensagem m = new Mensagem(data);
     }
 
     public void run(){
         new Thread(() -> {
             byte[] messageReceived = new byte[512];
-            DatagramPacket pacote = new DatagramPacket(messageReceived,512);
 
-            try { //TODO - passar para tcp
-                socket.receive(pacote);
+            try {
+                in.read(messageReceived);
             } catch (IOException e) {
                 e.printStackTrace();
             }
