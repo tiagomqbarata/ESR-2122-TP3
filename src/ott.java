@@ -1,8 +1,10 @@
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
 import java.util.*;
 
 public class ott {
+    public static final int PORT = 12345;
+
     public static void main(String[] args) {
 
         try {
@@ -35,13 +37,7 @@ public class ott {
         }
     }
 
-    static byte[] trim(byte[] bytes){
-        int i = bytes.length - 1;
-        while (i >= 0 && bytes[i] == 0) { --i; }
-        return Arrays.copyOf(bytes, i + 1);
-    }
-
-    static List<InetAddress> makeList(String [] args){
+    private static List<InetAddress> makeList(String [] args){
         List<InetAddress> vizinhos = new ArrayList<>();
         for(int i = 1; i<args.length; i++){
             try {
@@ -52,4 +48,95 @@ public class ott {
         }
         return vizinhos;
     }
+
+    public static Mensagem recebeMensagemTCP(Socket s) {
+        return recebeMensagemTCP(inCreate(s));
+    }
+
+    public static Mensagem recebeMensagemTCP(DataInputStream in){
+        byte[] data = new byte[512];
+        try {
+            in.read(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new Mensagem(data);
+    }
+
+    public static void enviaMensagemTCP(Socket s, Mensagem msg){
+        enviaMensagemTCP(outCreate(s), msg);
+    }
+
+    public static void enviaMensagemTCP(DataOutputStream out, Mensagem msg){
+        msg.incSaltos();
+        try {
+            out.write(msg.toBytes());
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static DataOutputStream outCreate(Socket s){
+        DataOutputStream out = null;
+
+        try {
+            out = new DataOutputStream(new BufferedOutputStream(s.getOutputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return out;
+    }
+
+    public static DataInputStream inCreate(Socket s){
+        DataInputStream in = null;
+
+        try {
+            in = new DataInputStream(new BufferedInputStream(s.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return in;
+    }
+
+    public static Socket socketTCPCreate(InetAddress addr){
+        Socket s = null;
+
+        try {
+            s = new Socket(addr,PORT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return s;
+    }
+
+    public static void enviaMensagemUDP(InetAddress addr, DatagramSocket s, Mensagem m){
+
+        DatagramPacket pacote = new DatagramPacket(m.toBytes(),
+                m.toBytes().length,
+                addr, ott.PORT);
+
+        try {
+            s.send(pacote);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Mensagem recebeMensagemUDP(DatagramSocket s){
+        byte [] data = new byte[512];
+        DatagramPacket packet = new DatagramPacket(data, 512);
+        try {
+            s.receive(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new Mensagem(data);
+    }
+
 }

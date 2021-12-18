@@ -1,22 +1,22 @@
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.*;
 
 public class Rota {
     private InetAddress servidor;
-    private static final int porta = 12345;
-    private InetAddress origem; //
+    private Socket origem; //
     private int saltos;
-    private int estado; //0 - inativa; 1 - ativa
+    private Boolean estado; //false - inativa; true - ativa
 
     /*
     identificação do servidor, identificação do fluxo, valor da métrica, etc;
     cada nó deve atualizar a tabela de rotas com: Servidor/Fluxo, Origem, Métrica, Destinos, Estado da Rota
      */
 
-    public Rota(InetAddress origem, int saltos){
+    public Rota(Socket origem, int saltos){
         this.origem = origem;
         this.saltos = saltos;
-        this.estado = 0;
+        this.estado = false;
     }
 
     public InetAddress getServidor() {
@@ -27,15 +27,11 @@ public class Rota {
         this.servidor = servidor;
     }
 
-    public int getPortaOrigem() {
-        return this.porta;
-    }
-
-    public InetAddress getOrigem() {
+    public Socket getOrigem() {
         return this.origem;
     }
 
-    public void setOrigem(InetAddress origem) {
+    public void setOrigem(Socket origem) {
         this.origem = origem;
     }
 
@@ -47,11 +43,13 @@ public class Rota {
         this.saltos = saltos;
     }
 
-    public int getEstado() {
+    public Boolean getEstado() {
         return this.estado;
     }
 
-    public void setEstado(int estado) {
-        this.estado = estado;
+    public void ativarRota() {
+        this.estado = true;
     }
+
+    public void desativarRota() {this.estado = false;}
 }

@@ -3,8 +3,7 @@ import java.net.*;
 import java.util.List;
 
 public class Server {
-    private DatagramSocket socket;
-    private static final int port = 12345;
+    private DatagramSocket streamSocket;
     private List<InetAddress> vizinhos;
     private InetAddress myIp;
 
@@ -12,7 +11,7 @@ public class Server {
         this.vizinhos = vizinhos;
         try {
             this.myIp = InetAddress.getLocalHost();
-            this.socket = new DatagramSocket(port);
+            this.streamSocket = new DatagramSocket(ott.PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -26,27 +25,17 @@ public class Server {
         for(InetAddress vizinho : vizinhos) {
             new Thread(() -> {
                 Mensagem m = new Mensagem("r", myIp);
-                try {
-                    Socket vizinhoSocket = new Socket(vizinho,port);
-                    DataOutputStream out = new DataOutputStream(new BufferedOutputStream(vizinhoSocket.getOutputStream()));
-                    DataInputStream in = new DataInputStream(new BufferedInputStream(vizinhoSocket.getInputStream()));
 
-                    out.write(m.toBytes());
-                    out.flush();
+                Socket s = ott.socketTCPCreate(vizinho);
+                ott.enviaMensagemTCP(s,m);
+                while(true) {
+                    Mensagem pedido = ott.recebeMensagemTCP(s);
 
-                    byte[] data = new byte[512];
-                    in.read(data);
+                    // STREAM
+                    Mensagem aEnviar = new Mensagem("d", myIp, pedido.getIpOrigemMensagem(), "Hello");
 
-                    Mensagem pedido = new Mensagem(data);
-
-                    //TODO - Responder ao pedido
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    ott.enviaMensagemUDP(pedido.getIpOrigemMensagem(), streamSocket, aEnviar);
                 }
-
-
             }).start();
         }
 
