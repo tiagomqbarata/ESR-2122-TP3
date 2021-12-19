@@ -37,6 +37,7 @@ public class Server {
 
                 while(true){
                     Mensagem msg = ott.recebeMensagemTCP(s);
+                    System.out.println(msg);
                     executa(msg,s.getInetAddress());
                 }
 
@@ -45,12 +46,13 @@ public class Server {
     }
 
     public void executa(Mensagem msg, InetAddress ip){
+        System.out.println("Cheguei aqui!!!!!!!");
         switch (msg.getTipo()) {
             case "ar" -> {
                 new Thread(() -> {
                     System.out.println("Recebi pedido de ativacao e vou mandar conteudo!");
                     runStreamer(ip);
-                });
+                }).start();
             }
             case "" -> { //caso da mensagem de "fecho de rota"
 

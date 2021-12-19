@@ -17,9 +17,7 @@ public class Client {
     private String filename = "movie.Mjpeg";
 
     JFrame f = new JFrame("Cliente de Testes");
-    JButton setupButton = new JButton("Setup");
     JButton playButton = new JButton("Play");
-    JButton pauseButton = new JButton("Pause");
     JButton tearButton = new JButton("Teardown");
     JPanel mainPanel = new JPanel();
     JPanel buttonPanel = new JPanel();
@@ -45,7 +43,7 @@ public class Client {
         }
         this.tcpSocket = ott.socketTCPCreate(vizinho);
 
-        Mensagem m = new Mensagem("ar", myIp,filename);
+        Mensagem m = new Mensagem("ar", myIp);
 
         ott.enviaMensagemTCP(this.tcpSocket, m);
 
@@ -116,7 +114,6 @@ public class Client {
     //-----------------------
     class tearButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e){
-
             System.out.println("Teardown Button pressed !");
             //stop the timer
             cTimer.stop();

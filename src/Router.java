@@ -22,7 +22,6 @@ public class Router {
     DatagramPacket rcvdp; //UDP packet received from the server (to receive)
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packet
     DatagramSocket sendRTPsocket; //socket to be used to forward UDP packet
-    static int RTP_RCV_PORT = 25000; //port where the client will receive the RTP packets
 
     Timer cTimer; //timer used to receive data from the UDP socket
     byte[] cBuf; //buffer used to store data received from the server
@@ -37,7 +36,8 @@ public class Router {
             this.streamSocket = new DatagramSocket(ott.PORT);
             this.serverSocket = new ServerSocket(ott.PORT);
             // Streaming
-            RTPsocket = new DatagramSocket(RTP_RCV_PORT); //init RTP socket (o mesmo para o cliente e servidor)
+            RTPsocket = new DatagramSocket(ott.RTP_PORT); //init RTP socket (o mesmo para o cliente e servidor)
+            sendRTPsocket = new DatagramSocket();
             RTPsocket.setSoTimeout(5000); // setimeout to 5s
         } catch (SocketException e) {
             System.out.println("Cliente: erro no socket: " + e.getMessage());
@@ -72,14 +72,13 @@ public class Router {
         }).start();
 
         new Thread(() ->{
-            while (true) {
-                //init para a parte do cliente
-                //--------------------------
-                cTimer = new Timer(20, new routerTimerListener());
-                cTimer.setInitialDelay(0);
-                cTimer.setCoalesce(true);
-                cBuf = new byte[15000]; //allocate enough memory for the buffer used to receive data from the server
-            }
+            //init para a parte do cliente
+            //--------------------------
+            cTimer = new Timer(20, new routerTimerListener());
+            cTimer.setInitialDelay(0);
+            cTimer.setCoalesce(true);
+            cBuf = new byte[15000]; //allocate enough memory for the buffer used to receive data from the server
+            cTimer.start();
         }).start();
 
     }
@@ -103,13 +102,20 @@ public class Router {
                }
                case "ar" -> {
                    System.out.println("Recebido pedido de ativacao!");
+
                    this.addRota(msg.getIpOrigemMensagem(), tcpSocket, msg.getSaltos());
                    this.ligados++;
+
+                   if(!existeRotaAtiva()){
+                       Rota r = routing_table.get(ipServidor);
+
+                       ott.enviaMensagemTCP(r.getOrigem(), msg);
+
+                       System.out.println(routing_table);
+                   }
+
                    routing_table.get(msg.getIpOrigemMensagem()).ativarRota();
 
-                   Rota r = routing_table.get(ipServidor);
-
-                   ott.enviaMensagemTCP(r.getOrigem(), msg);
                }
                case "" -> { //caso da mensagem de "fecho de rota"
                    this.ligados--;
@@ -127,31 +133,6 @@ public class Router {
        }).start();
     }
 
-    private void executa(Mensagem msg) {
-        new Thread(()->{
-            switch (msg.getTipo()){
-                case "d" -> {
-                    Rota r = routing_table.get(msg.getIpDestino());
-
-                    ott.enviaMensagemUDP(r.getOrigem().getInetAddress(), streamSocket, msg);
-
-                }
-                case "" -> { //caso da mensagem de "fecho de rota"
-                    this.ligados--;
-
-
-                    Rota r = routing_table.get(ipServidor);
-                    r.ativarRota();
-
-                    ott.enviaMensagemTCP(r.getOrigem(), msg);
-                }
-                case "EEE" -> {
-                    System.out.println("ERRO NA MENSAGEM");
-                }
-            }
-
-        }).start();
-    }
 
     private void comunicaVizinho(Mensagem msg, InetAddress vizinho){
         new Thread(() -> {
@@ -185,9 +166,11 @@ public class Router {
 
                 // reencaminhar para todas as rotas ativas?
                 for(InetAddress ip : routing_table.keySet()){
+
                     if(routing_table.get(ip).getEstado() && !ip.equals(rcvdp.getAddress()) && !ip.equals(ipServidor)){
-                        sendRTPsocket = new DatagramSocket(ott.RTP_PORT,routing_table.get(ip).getOrigem().getInetAddress());
-                        sendRTPsocket.send(rcvdp);
+                        DatagramPacket toSend = new DatagramPacket(cBuf,cBuf.length, routing_table.get(ip).getOrigem().getInetAddress(), ott.RTP_PORT);
+
+                        sendRTPsocket.send(toSend);
                     }
                 }
             }
@@ -198,6 +181,13 @@ public class Router {
                 System.out.println("Exception caught: "+ioe);
             }
         }
+    }
+
+    public Boolean existeRotaAtiva(){
+        for (Rota r : routing_table.values()){
+            if(r.getEstado()) return true;
+        }
+        return false;
     }
 
 }

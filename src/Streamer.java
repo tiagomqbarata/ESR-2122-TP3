@@ -23,7 +23,7 @@ public class Streamer extends JFrame implements ActionListener {
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packet
 
     static InetAddress IPAddrToSend; //Client IP address
-    static String VideoFileName; //video file to request to the server
+    static String VideoFileName = "movie.Mjpeg"; //video file to request to the server
 
     //Video constants:
     //------------------
@@ -46,6 +46,8 @@ public class Streamer extends JFrame implements ActionListener {
         sTimer.setInitialDelay(0);
         sTimer.setCoalesce(true);
         sBuf = new byte[15000]; //allocate memory for the sending buffer
+
+        System.out.println(VideoFileName);
 
         try {
             IPAddrToSend = ip;
@@ -115,7 +117,8 @@ public class Streamer extends JFrame implements ActionListener {
         }
         else {
             //if we have reached the end of the video file, stop the timer
-            sTimer.stop();
+            //sTimer.stop();
+            imagenb=0;
         }
     }
 }
