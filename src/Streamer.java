@@ -37,7 +37,7 @@ public class Streamer extends JFrame implements ActionListener {
     byte[] sBuf; //buffer used to store the images to send to the client
 
 
-    public Streamer(){
+    public Streamer(InetAddress ip){
         //init Frame
         super("Streamer");
 
@@ -48,6 +48,7 @@ public class Streamer extends JFrame implements ActionListener {
         sBuf = new byte[15000]; //allocate memory for the sending buffer
 
         try {
+            IPAddrToSend = ip;
             RTPsocket = new DatagramSocket(); //init RTP socket
             video = new VideoStream(VideoFileName); //init the VideoStream object:
             System.out.println("Servidor: vai enviar video da file " + VideoFileName);
@@ -73,22 +74,7 @@ public class Streamer extends JFrame implements ActionListener {
         sTimer.start();
     }
 
-    public static void run(String filename, InetAddress ip) {
-        //get video filename to request:
-        IPAddrToSend = ip;
-        VideoFileName = filename;
-        System.out.println("Servidor: VideoFileName indicado como parametro: " + VideoFileName);
 
-        File f = new File(VideoFileName);
-        if (f.exists()) {
-            //Create a Main object
-            Streamer s = new Streamer();
-            //show GUI: (opcional!)
-            s.pack();
-            s.setVisible(true);
-        } else
-            System.out.println("Ficheiro de video não existe: " + VideoFileName);
-    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
