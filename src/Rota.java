@@ -8,11 +8,6 @@ public class Rota {
     private int saltos;
     private Boolean estado; //false - inativa; true - ativa
 
-    /*
-    identificação do servidor, identificação do fluxo, valor da métrica, etc;
-    cada nó deve atualizar a tabela de rotas com: Servidor/Fluxo, Origem, Métrica, Destinos, Estado da Rota
-     */
-
     public Rota(Socket origem, int saltos){
         this.origem = origem;
         this.saltos = saltos;

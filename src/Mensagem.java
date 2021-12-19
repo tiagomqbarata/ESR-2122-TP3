@@ -16,14 +16,12 @@ public class Mensagem implements Serializable {
         this.ipOrigemMensagem = ipOrigemMensagem;
     }
 
-    public Mensagem(String tipo, InetAddress ipOrigemMensagem, InetAddress ipDestino, String dados){
+    public Mensagem(String tipo, InetAddress ipOrigemMensagem, String dados){
         this.tipo = tipo;
         this.saltos = 1;
         this.ipOrigemMensagem = ipOrigemMensagem;
-        this.ipDestino = ipDestino;
         this.dados = dados;
     }
-
 
     public Mensagem(){
         this.tipo = "EEE";
@@ -54,26 +52,18 @@ public class Mensagem implements Serializable {
                 }
             } catch (IOException ex) {
                 System.out.println("Erro a fechar a deserialização... ignorado");
-                // ignore close exception
             }
         }
     }
 
-
-    public void incSaltos(){
-        this.saltos += 1;
-    }
-
     public byte[] toBytes(){
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream out = null;
-        byte[] yourBytes = null;
+        byte[] bytes = null;
         try {
-            out = new ObjectOutputStream(bos);
+            ObjectOutputStream out = new ObjectOutputStream(bos);
             out.writeObject(this);
             out.flush();
-            yourBytes = bos.toByteArray();
-
+            bytes = bos.toByteArray();
         } catch (IOException e) {
             System.out.println("Erro na serialização");
             e.printStackTrace();
@@ -81,11 +71,14 @@ public class Mensagem implements Serializable {
             try {
                 bos.close();
             } catch (IOException ex) {
-                // ignore close exception
                 System.out.println("Erro a fechar a serialização ... ignorado");
             }
         }
-        return yourBytes;
+        return bytes;
+    }
+
+    public void incSaltos(){
+        this.saltos += 1;
     }
 
     public int length(){
@@ -106,6 +99,10 @@ public class Mensagem implements Serializable {
 
     public InetAddress getIpDestino(){
         return this.ipDestino;
+    }
+
+    public String getDados(){
+        return this.dados;
     }
 
     public String toString(){

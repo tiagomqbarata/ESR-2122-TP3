@@ -4,6 +4,7 @@ import java.util.*;
 
 public class ott {
     public static final int PORT = 12345;
+    static int RTP_PORT = 25000; //port where the client will receive the RTP packets
 
     public static void main(String[] args) {
 
@@ -24,13 +25,12 @@ public class ott {
             }
             case "-c" -> {
                 if(args.length == 2){
-                    Client c = null;
                     try {
-                        c = new Client(InetAddress.getByName(args[1]));
+                        Client c = new Client(InetAddress.getByName(args[1]));
+                        c.run();
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
                     }
-                    c.run();
                 }else
                     System.out.println("O cliente apenas pode estar ligado a um router.");
             }
@@ -115,7 +115,6 @@ public class ott {
     }
 
     public static void enviaMensagemUDP(InetAddress addr, DatagramSocket s, Mensagem m){
-
         DatagramPacket pacote = new DatagramPacket(m.toBytes(),
                 m.toBytes().length,
                 addr, ott.PORT);

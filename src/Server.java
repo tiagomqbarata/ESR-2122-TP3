@@ -1,72 +1,64 @@
-import java.io.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.net.*;
 import java.util.List;
 
 public class Server {
-    private DatagramSocket streamSocket;
-    private List<InetAddress> vizinhos;
+    private ServerSocket serverSocket;
+    private final List<InetAddress> vizinhos;
     private InetAddress myIp;
 
     public Server(List<InetAddress> vizinhos){
         this.vizinhos = vizinhos;
         try {
             this.myIp = InetAddress.getLocalHost();
-            this.streamSocket = new DatagramSocket(ott.PORT);
+            this.serverSocket = new ServerSocket();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public void run(){
-        /**
+        /*
          * Envio de mensagem de resposta dos vizinhos, via tcp
-         * */
+         */
         for(InetAddress vizinho : vizinhos) {
             new Thread(() -> {
                 Mensagem m = new Mensagem("r", myIp);
 
                 Socket s = ott.socketTCPCreate(vizinho);
                 ott.enviaMensagemTCP(s,m);
-                while(true) {
-                    Mensagem pedido = ott.recebeMensagemTCP(s);
 
-                    // STREAM
-                    Mensagem aEnviar = new Mensagem("d", myIp, pedido.getIpOrigemMensagem(), "Hello");
+                Mensagem msg = ott.recebeMensagemTCP(s);
 
-                    ott.enviaMensagemUDP(pedido.getIpOrigemMensagem(), streamSocket, aEnviar);
-                }
+                executa(msg,s.getInetAddress());
             }).start();
         }
 
-        /**
-         * Espera de pedidos UDP
-         * */
-/*        new Thread(() -> {
-            while (true){
-                byte[] messageReceived = new byte[512];
-                DatagramPacket pacote = new DatagramPacket(messageReceived,512);
+        /*
+         * Receção de mensagens de ativação de rota e consequente transmissão de stream ( em udp )
+         */
 
-                try {
-                    socket.receive(pacote);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Mensagem m = new Mensagem(messageReceived);
+    }
 
-                switch (m.getTipo()) {
-                    case "ar" -> {
-                        // Mensagem recebida
-                        System.out.println(new String(ott.trim(messageReceived)));
-                        //TODO - FAZER A STREAM AQUI
+    public void executa(Mensagem msg, InetAddress ip){
+        switch (msg.getTipo()) {
+            case "ar" -> {
+                new Thread(() -> {
+                    while(true){
+                        Streamer.run(msg.getDados(),ip,msg.getIpOrigemMensagem());
                     }
-                    case "" -> { //caso da mensagem de "fecho de rota"
-
-                    }
-                }
+                });
             }
-        }).start();
-*/
+            case "" -> { //caso da mensagem de "fecho de rota"
+
+            }
+        }
     }
 }
 
