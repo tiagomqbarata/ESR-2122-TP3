@@ -102,6 +102,7 @@ public class Router {
                    }
                }
                case "ar" -> {
+                   System.out.println("Recebido pedido de ativacao!");
                    this.addRota(msg.getIpOrigemMensagem(), tcpSocket, msg.getSaltos());
                    this.ligados++;
                    routing_table.get(msg.getIpOrigemMensagem()).ativarRota();

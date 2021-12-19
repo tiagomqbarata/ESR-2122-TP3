@@ -34,25 +34,21 @@ public class Server {
                 Socket s = ott.socketTCPCreate(vizinho);
                 ott.enviaMensagemTCP(s,m);
 
-                Mensagem msg = ott.recebeMensagemTCP(s);
+                while(true){
+                    Mensagem msg = ott.recebeMensagemTCP(s);
+                    executa(msg,s.getInetAddress());
+                }
 
-                executa(msg,s.getInetAddress());
             }).start();
         }
-
-        /*
-         * Receção de mensagens de ativação de rota e consequente transmissão de stream ( em udp )
-         */
-
     }
 
     public void executa(Mensagem msg, InetAddress ip){
         switch (msg.getTipo()) {
             case "ar" -> {
                 new Thread(() -> {
-                    while(true){
-                        Streamer.run(msg.getDados(),ip,msg.getIpOrigemMensagem());
-                    }
+                    System.out.println("Recebi pedido de ativacao e vou mandar conteudo!");
+                    Streamer.run(msg.getDados(),ip);
                 });
             }
             case "" -> { //caso da mensagem de "fecho de rota"

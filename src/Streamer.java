@@ -23,7 +23,6 @@ public class Streamer extends JFrame implements ActionListener {
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packet
 
     static InetAddress IPAddrToSend; //Client IP address
-    static InetAddress ClientIpAddr;
     static String VideoFileName; //video file to request to the server
 
     //Video constants:
@@ -74,10 +73,9 @@ public class Streamer extends JFrame implements ActionListener {
         sTimer.start();
     }
 
-    public static void run(String filename, InetAddress ip, InetAddress ipClient) {
+    public static void run(String filename, InetAddress ip) {
         //get video filename to request:
         IPAddrToSend = ip;
-        ClientIpAddr = ipClient;
         VideoFileName = filename;
         System.out.println("Servidor: VideoFileName indicado como parametro: " + VideoFileName);
 
