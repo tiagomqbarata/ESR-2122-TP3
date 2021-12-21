@@ -7,18 +7,22 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Server {
     private ServerSocket serverSocket;
     private final List<InetAddress> vizinhos;
     private InetAddress myIp;
+    private Map<InetAddress, Streamer> streams;
 
     public Server(List<InetAddress> vizinhos){
         this.vizinhos = vizinhos;
+        this.streams = new HashMap<>();
         try {
             this.myIp = InetAddress.getLocalHost();
-            this.serverSocket = new ServerSocket();
+            this.serverSocket = new ServerSocket(ott.TCP_PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,24 +47,57 @@ public class Server {
 
             }).start();
         }
+/*
+        while (true){
+            new Thread(() -> {
+                try {
+                    Socket tcpSocket = serverSocket.accept();
+
+                    Mensagem msg = ott.recebeMensagemTCP(tcpSocket);
+
+                    //TODO acabar (se o servidor tiver um cliente diretamente ligado...)
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+
+ */
     }
 
     public void executa(Mensagem msg, InetAddress ip){
-        System.out.println("Cheguei aqui!!!!!!!");
         switch (msg.getTipo()) {
             case "ar" -> {
                 new Thread(() -> {
-                    System.out.println("Recebi pedido de ativacao e vou mandar conteudo!");
-                    runStreamer(ip);
+                    System.out.println("A iniciar a transmissão...");
+
+                    Streamer streamer = createStreamer(ip);
+
+                    if(streamer==null){
+                        System.out.println("ERRO A CRIAR A STREAM PARA " + ip);
+                    }else{
+                        streams.put(ip,streamer);
+                        streamer.startStream();
+                    }
+
                 }).start();
             }
-            case "" -> { //caso da mensagem de "fecho de rota"
+            case "dr" -> { //caso da mensagem de "fecho de rota"
 
+                System.out.println("A fechar a transmissao...");
+                Streamer streamer = streams.remove(ip);
+                if(streamer != null)
+                    streamer.stopStream();
+                else{
+                    System.out.println("---------------ERRO NA STREAM-------------------");
+                    System.out.println("Mensagem: " + msg);
+                    System.out.println("Ip de onde veio: " + ip);
+                }
             }
         }
     }
 
-    public  void runStreamer(InetAddress ip) {
+    public Streamer createStreamer(InetAddress ip) {
         //get video filename to request:
 
         File f = new File("movie.Mjpeg");
@@ -70,8 +107,13 @@ public class Server {
             //show GUI: (opcional!)
             s.pack();
             s.setVisible(true);
+
+            return s;
+
         } else
             System.out.println("Ficheiro de video não existe");
+
+        return null;
     }
 }
 

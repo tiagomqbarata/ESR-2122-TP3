@@ -72,10 +72,15 @@ public class Streamer extends JFrame implements ActionListener {
         //GUI:
         label = new JLabel("Send frame #        ", JLabel.CENTER);
         getContentPane().add(label, BorderLayout.CENTER);
+    }
 
+    public void startStream(){
         sTimer.start();
     }
 
+    public void stopStream(){
+        sTimer.stop();
+    }
 
 
     @Override
@@ -111,7 +116,7 @@ public class Streamer extends JFrame implements ActionListener {
                 label.setText("Send frame #" + imagenb);
             }
             catch(Exception ex) {
-                System.out.println("Exception caught: "+ex);
+                System.out.println("Exception caught in actionPerformed: "+ex);
                 System.exit(0);
             }
         }
@@ -119,6 +124,11 @@ public class Streamer extends JFrame implements ActionListener {
             //if we have reached the end of the video file, stop the timer
             //sTimer.stop();
             imagenb=0;
+            try {
+                video = new VideoStream(VideoFileName); //init the VideoStream object:
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

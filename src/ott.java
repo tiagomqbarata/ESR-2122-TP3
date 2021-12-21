@@ -3,8 +3,8 @@ import java.net.*;
 import java.util.*;
 
 public class ott {
-    public static final int PORT = 12345;
-    static int RTP_PORT = 25000; //port where the client will receive the RTP packets
+    public static final int TCP_PORT = 12345;
+    public static final int RTP_PORT = 25000; //port where the client will receive the RTP packets
 
     public static void main(String[] args) {
 
@@ -61,6 +61,7 @@ public class ott {
             e.printStackTrace();
         }
 
+
         return new Mensagem(data);
     }
 
@@ -106,7 +107,7 @@ public class ott {
         Socket s = null;
 
         try {
-            s = new Socket(addr,PORT);
+            s = new Socket(addr, TCP_PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -117,7 +118,7 @@ public class ott {
     public static void enviaMensagemUDP(InetAddress addr, DatagramSocket s, Mensagem m){
         DatagramPacket pacote = new DatagramPacket(m.toBytes(),
                 m.toBytes().length,
-                addr, ott.PORT);
+                addr, ott.TCP_PORT);
 
         try {
             s.send(pacote);
@@ -137,5 +138,7 @@ public class ott {
 
         return new Mensagem(data);
     }
+
+
 
 }

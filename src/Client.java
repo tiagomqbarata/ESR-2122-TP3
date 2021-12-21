@@ -43,7 +43,7 @@ public class Client {
         }
         this.tcpSocket = ott.socketTCPCreate(vizinho);
 
-        Mensagem m = new Mensagem("ar", myIp);
+        Mensagem m = new Mensagem("arC", myIp);
 
         ott.enviaMensagemTCP(this.tcpSocket, m);
 
@@ -118,7 +118,19 @@ public class Client {
             //stop the timer
             cTimer.stop();
             //exit
+
+            Mensagem fechoRota = new Mensagem("drC", myIp);
+
+            ott.enviaMensagemTCP(tcpSocket, fechoRota);
+
+            try {
+                tcpSocket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
             System.exit(0);
+
         }
     }
 
