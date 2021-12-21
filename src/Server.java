@@ -63,17 +63,13 @@ public class Server {
     public void executa(Mensagem msg, InetAddress ip){
         switch (msg.getTipo()) {
             case "ar" -> {
-                new Thread(() -> {
-                    System.out.println("A iniciar a transmissão...");
-
-                    s.addIp(ip);
-                    if(s.getNumberIps()==1){
-                        s.startStream();
-                    }
-                }).start();
+                System.out.println("A iniciar a transmissão...");
+                s.addIp(ip);
+                if(s.getNumberIps()==1){
+                    s.startStream();
+                }
             }
             case "dr" -> { //caso da mensagem de "fecho de rota"
-
                 System.out.println("A fechar a transmissao...");
                 s.remIp(ip);
                 if(s.getNumberIps()==0){

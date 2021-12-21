@@ -81,9 +81,9 @@ public class Router {
     }
 
     private void executaNovo(Mensagem msg, Socket tcpSocket) {
-       new Thread(()->{
-           executa(msg,tcpSocket);
-       }).start();
+        new Thread(()->{
+            executa(msg,tcpSocket);
+        }).start();
     }
 
     private void executa(Mensagem msg, Socket tcpSocket) {
@@ -105,16 +105,18 @@ public class Router {
                 case "ar" -> {
                     System.out.println("Recebido pedido de ativacao de router!");
 
-                    this.addRota(tcpSocket.getInetAddress(), tcpSocket, msg.getSaltos());
-                    this.ligados++;
 
                     System.out.println("AR - Estao ligados " + ligados);
-                    if (ligados > 0) {
+                    if (ligados == 0) {
                         Rota r = routing_table.get(ipServidor);
 
                         ott.enviaMensagemTCP(r.getOrigem(), msg);
 
                         System.out.println(routing_table);
+                    }
+
+                    if(this.addRota(tcpSocket.getInetAddress(), tcpSocket, msg.getSaltos())){
+                        this.ligados++;
                     }
 
                     routing_table.get(tcpSocket.getInetAddress()).ativarRota();
@@ -123,32 +125,6 @@ public class Router {
                     executa(m, tcpSocket);
 
                 }
-                /*
-                case "arC" -> {
-                    System.out.println("Recebido pedido de ativacao de cliente!");
-
-                    this.addRota(msg.getIpOrigemMensagem(), tcpSocket, msg.getSaltos());
-                    this.ligados++;
-
-                    System.out.println("ARC - Estao ligados " + ligados);
-                    if (!existeRotaAtiva()) {
-                        System.out.println("Nao existe rota ativaaaaaa");
-
-                        Rota r = routing_table.get(ipServidor);
-
-                        Mensagem nova = new Mensagem("ar", myIp);
-
-                        ott.enviaMensagemTCP(r.getOrigem(), nova);
-
-                        System.out.println(routing_table);
-                    }
-
-                    routing_table.get(msg.getIpOrigemMensagem()).ativarRota();
-
-                    Mensagem m = ott.recebeMensagemTCP(tcpSocket);
-                    executa(m, tcpSocket);
-
-                }*/
                 case "dr" -> { //caso da mensagem de "fecho de rota"
                     this.ligados--;
 
@@ -263,14 +239,14 @@ public class Router {
                 RTPpacket rtp_packet = new RTPpacket(rcvdp.getData(), rcvdp.getLength());
 
                 //print important header fields of the RTP packet received:
-                System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
+                // System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
 
-                //System.out.println("N Rotas Ativas: " + ligados);
+                System.out.println("N Rotas Ativas: " + ligados);
 
                 int i = 0;
                 for(InetAddress ip : routing_table.keySet()){
                     if(routing_table.get(ip).getEstado() && !ip.equals(rcvdp.getAddress()) && !ip.equals(ipServidor)){
-                        //System.out.println("Rota to " + routing_table.get(ip).getOrigem().getInetAddress());
+                        System.out.println("Rota to " + routing_table.get(ip).getOrigem().getInetAddress());
                         DatagramPacket toSend = new DatagramPacket(cBuf,cBuf.length, routing_table.get(ip).getOrigem().getInetAddress(), ott.RTP_PORT);
 
                         sendRTPsocket.send(toSend);
