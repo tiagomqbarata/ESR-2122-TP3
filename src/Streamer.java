@@ -9,7 +9,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Streamer extends JFrame implements ActionListener {
 
@@ -22,7 +23,8 @@ public class Streamer extends JFrame implements ActionListener {
     DatagramPacket senddp; //UDP packet containing the video frames (to send)A
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packet
 
-    static InetAddress IPAddrToSend; //Client IP address
+
+    static List<InetAddress> IPAddrToSend; //Client IP address
     static String VideoFileName = "movie.Mjpeg"; //video file to request to the server
 
     //Video constants:
@@ -37,20 +39,16 @@ public class Streamer extends JFrame implements ActionListener {
     byte[] sBuf; //buffer used to store the images to send to the client
 
 
-    public Streamer(InetAddress ip){
+    public Streamer(){
         //init Frame
         super("Streamer");
 
-        // init para a parte do servidor
-        sTimer = new Timer(FRAME_PERIOD, this); //init Timer para servidor
-        sTimer.setInitialDelay(0);
-        sTimer.setCoalesce(true);
-        sBuf = new byte[15000]; //allocate memory for the sending buffer
+
 
         System.out.println(VideoFileName);
 
         try {
-            IPAddrToSend = ip;
+            IPAddrToSend = new ArrayList<>();
             RTPsocket = new DatagramSocket(); //init RTP socket
             video = new VideoStream(VideoFileName); //init the VideoStream object:
             System.out.println("Servidor: vai enviar video da file " + VideoFileName);
@@ -75,11 +73,28 @@ public class Streamer extends JFrame implements ActionListener {
     }
 
     public void startStream(){
+        // init para a parte do servidor
+        sTimer = new Timer(FRAME_PERIOD, this); //init Timer para servidor
+        sTimer.setInitialDelay(0);
+        sTimer.setCoalesce(true);
+        sBuf = new byte[15000]; //allocate memory for the sending buffer
         sTimer.start();
     }
 
     public void stopStream(){
         sTimer.stop();
+    }
+
+    public void addIp(InetAddress ip){
+        IPAddrToSend.add(ip);
+    }
+
+    public void remIp(InetAddress ip){
+        IPAddrToSend.remove(ip);
+    }
+
+    public int getNumberIps(){
+        return IPAddrToSend.size();
     }
 
 
@@ -105,8 +120,10 @@ public class Streamer extends JFrame implements ActionListener {
                 rtp_packet.getpacket(packet_bits);
 
                 //send the packet as a DatagramPacket over the UDP socket
-                senddp = new DatagramPacket(packet_bits, packet_length, IPAddrToSend, ott.RTP_PORT);
-                RTPsocket.send(senddp);
+                for(InetAddress ip : IPAddrToSend){
+                    senddp = new DatagramPacket(packet_bits, packet_length, ip, ott.RTP_PORT);
+                    RTPsocket.send(senddp);
+                }
 
                 System.out.println("Send frame #"+imagenb);
                 //print the header bitstream

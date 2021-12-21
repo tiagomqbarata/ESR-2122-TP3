@@ -16,6 +16,7 @@ public class Server {
     private final List<InetAddress> vizinhos;
     private InetAddress myIp;
     private Map<InetAddress, Streamer> streams;
+    Streamer s;
 
     public Server(List<InetAddress> vizinhos){
         this.vizinhos = vizinhos;
@@ -26,6 +27,16 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        File f = new File("movie.Mjpeg");
+        if (f.exists()) {
+            //Create a Main object
+            this.s = new Streamer();
+            //show GUI: (opcional!)
+            s.pack();
+            s.setVisible(true);
+        } else
+            System.out.println("Ficheiro de video não existe");
     }
 
     public void run(){
@@ -47,22 +58,6 @@ public class Server {
 
             }).start();
         }
-/*
-        while (true){
-            new Thread(() -> {
-                try {
-                    Socket tcpSocket = serverSocket.accept();
-
-                    Mensagem msg = ott.recebeMensagemTCP(tcpSocket);
-
-                    //TODO acabar (se o servidor tiver um cliente diretamente ligado...)
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }
-
- */
     }
 
     public void executa(Mensagem msg, InetAddress ip){
@@ -71,49 +66,21 @@ public class Server {
                 new Thread(() -> {
                     System.out.println("A iniciar a transmissão...");
 
-                    Streamer streamer = createStreamer(ip);
-
-                    if(streamer==null){
-                        System.out.println("ERRO A CRIAR A STREAM PARA " + ip);
-                    }else{
-                        streams.put(ip,streamer);
-                        streamer.startStream();
+                    s.addIp(ip);
+                    if(s.getNumberIps()==1){
+                        s.startStream();
                     }
-
                 }).start();
             }
             case "dr" -> { //caso da mensagem de "fecho de rota"
 
                 System.out.println("A fechar a transmissao...");
-                Streamer streamer = streams.remove(ip);
-                if(streamer != null)
-                    streamer.stopStream();
-                else{
-                    System.out.println("---------------ERRO NA STREAM-------------------");
-                    System.out.println("Mensagem: " + msg);
-                    System.out.println("Ip de onde veio: " + ip);
+                s.remIp(ip);
+                if(s.getNumberIps()==0){
+                    s.stopStream();
                 }
             }
         }
-    }
-
-    public Streamer createStreamer(InetAddress ip) {
-        //get video filename to request:
-
-        File f = new File("movie.Mjpeg");
-        if (f.exists()) {
-            //Create a Main object
-            Streamer s = new Streamer(ip);
-            //show GUI: (opcional!)
-            s.pack();
-            s.setVisible(true);
-
-            return s;
-
-        } else
-            System.out.println("Ficheiro de video não existe");
-
-        return null;
     }
 }
 

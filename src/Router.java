@@ -47,8 +47,7 @@ public class Router {
     public boolean addRota(InetAddress destino, Socket from, int saltos){
         Rota r = routing_table.get(destino);
         if(r == null || saltos < r.getSaltos()){
-            r = new Rota(from, saltos);
-            routing_table.put(destino,r);
+            routing_table.put(destino,new Rota(from, saltos));
             return true;
         }
         return false;
@@ -106,13 +105,11 @@ public class Router {
                 case "ar" -> {
                     System.out.println("Recebido pedido de ativacao de router!");
 
-                    this.addRota(msg.getIpOrigemMensagem(), tcpSocket, msg.getSaltos());
+                    this.addRota(tcpSocket.getInetAddress(), tcpSocket, msg.getSaltos());
                     this.ligados++;
 
                     System.out.println("AR - Estao ligados " + ligados);
-                    if (!existeRotaAtiva()) {
-                        System.out.println("Nao existe rota ativaaaaaa");
-
+                    if (ligados > 0) {
                         Rota r = routing_table.get(ipServidor);
 
                         ott.enviaMensagemTCP(r.getOrigem(), msg);
@@ -120,12 +117,13 @@ public class Router {
                         System.out.println(routing_table);
                     }
 
-                    routing_table.get(msg.getIpOrigemMensagem()).ativarRota();
+                    routing_table.get(tcpSocket.getInetAddress()).ativarRota();
 
                     Mensagem m = ott.recebeMensagemTCP(tcpSocket);
                     executa(m, tcpSocket);
 
                 }
+                /*
                 case "arC" -> {
                     System.out.println("Recebido pedido de ativacao de cliente!");
 
@@ -150,12 +148,12 @@ public class Router {
                     Mensagem m = ott.recebeMensagemTCP(tcpSocket);
                     executa(m, tcpSocket);
 
-                }
+                }*/
                 case "dr" -> { //caso da mensagem de "fecho de rota"
                     this.ligados--;
 
                     try {
-                        routing_table.get(msg.getIpOrigemMensagem()).desativarRota();
+                        routing_table.get(tcpSocket.getInetAddress()).desativarRota();
                     } catch (Exception ex) {
                         System.out.println();
                         System.out.println();
@@ -172,7 +170,7 @@ public class Router {
 
                     System.out.println("DR - Estao ligados " + ligados);
                     if (ligados == 0) {
-                        System.out.println("A enviar " + msg + " para " + tcpSocket.getInetAddress());
+                        System.out.println("A enviar " + msg + " para " + routing_table.get(ipServidor).getOrigem().getInetAddress());
 
                         ott.enviaMensagemTCP(routing_table.get(ipServidor).getOrigem(), msg);
                     }
@@ -184,7 +182,7 @@ public class Router {
                     this.ligados--;
 
                     try {
-                        routing_table.get(msg.getIpOrigemMensagem()).desativarRota();
+                        routing_table.get(tcpSocket.getInetAddress()).desativarRota();
                     } catch (Exception ex) {
                         System.out.println();
                         System.out.println();
@@ -202,7 +200,7 @@ public class Router {
                     System.out.println("DR - Estao ligados " + ligados);
                     if (ligados == 0) {
                         Mensagem nova = new Mensagem("dr", myIp);
-                        System.out.println("A enviar " + nova + " para " + tcpSocket.getInetAddress());
+                        System.out.println("A enviar " + nova + " para " + routing_table.get(ipServidor).getOrigem().getInetAddress());
                         ott.enviaMensagemTCP(routing_table.get(ipServidor).getOrigem(), nova);
                     }
 

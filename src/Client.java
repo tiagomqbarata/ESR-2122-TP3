@@ -43,7 +43,7 @@ public class Client {
         }
         this.tcpSocket = ott.socketTCPCreate(vizinho);
 
-        Mensagem m = new Mensagem("arC", myIp);
+        Mensagem m = new Mensagem("ar", myIp);
 
         ott.enviaMensagemTCP(this.tcpSocket, m);
 
