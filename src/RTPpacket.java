@@ -1,6 +1,6 @@
 //class RTPpacket
 
-public class RTPpacket extends Streamer {
+public class RTPpacket {
 
     //size of the RTP header:
     static int HEADER_SIZE = 12;
