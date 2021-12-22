@@ -12,18 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 public class Server {
-    private ServerSocket serverSocket;
     private final List<InetAddress> vizinhos;
     private InetAddress myIp;
-    private Map<InetAddress, Streamer> streams;
     Streamer s;
 
     public Server(List<InetAddress> vizinhos){
         this.vizinhos = vizinhos;
-        this.streams = new HashMap<>();
         try {
             this.myIp = InetAddress.getLocalHost();
-            this.serverSocket = new ServerSocket(ott.TCP_PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }

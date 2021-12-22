@@ -115,30 +115,4 @@ public class ott {
         return s;
     }
 
-    public static void enviaMensagemUDP(InetAddress addr, DatagramSocket s, Mensagem m){
-        DatagramPacket pacote = new DatagramPacket(m.toBytes(),
-                m.toBytes().length,
-                addr, ott.TCP_PORT);
-
-        try {
-            s.send(pacote);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static Mensagem recebeMensagemUDP(DatagramSocket s){
-        byte [] data = new byte[512];
-        DatagramPacket packet = new DatagramPacket(data, 512);
-        try {
-            s.receive(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return new Mensagem(data);
-    }
-
-
-
 }

@@ -96,8 +96,7 @@ public class Streamer extends JFrame implements ActionListener {
     public int getNumberIps(){
         return IPAddrToSend.size();
     }
-
-
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         //if the current image nb is less than the length of the video

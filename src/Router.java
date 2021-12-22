@@ -10,7 +10,6 @@ public class Router {
     private final List<InetAddress> vizinhos;
     private Map<InetAddress, Rota> routing_table;
     private InetAddress ipServidor;
-    private DatagramSocket streamSocket;
     private ServerSocket serverSocket;
     private int ligados;
     private InetAddress myIp;
@@ -31,7 +30,6 @@ public class Router {
         this.routing_table = new HashMap<>();
         try {
             this.myIp = InetAddress.getLocalHost();
-            this.streamSocket = new DatagramSocket(ott.TCP_PORT);
             this.serverSocket = new ServerSocket(ott.TCP_PORT);
             // Streaming
             RTPsocket = new DatagramSocket(ott.RTP_PORT); //init RTP socket (o mesmo para o cliente e servidor)
@@ -61,7 +59,7 @@ public class Router {
 
                     Mensagem msg = ott.recebeMensagemTCP(tcpSocket);
 
-                    executaNovo(msg, tcpSocket);
+                    executaFirst(msg, tcpSocket);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -80,7 +78,7 @@ public class Router {
 
     }
 
-    private void executaNovo(Mensagem msg, Socket tcpSocket) {
+    private void executaFirst(Mensagem msg, Socket tcpSocket) {
         new Thread(()->{
             executa(msg,tcpSocket);
         }).start();
@@ -208,7 +206,6 @@ public class Router {
         }
     }
 
-
     private void comunicaVizinho(Mensagem msg, InetAddress vizinho){
         new Thread(() -> {
             Socket s = ott.socketTCPCreate(vizinho);
@@ -223,8 +220,7 @@ public class Router {
 
         }).start();
     }
-
-
+    
     private class routerTimerListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -262,14 +258,6 @@ public class Router {
                 System.out.println("Exception caught: "+ioe);
             }
         }
-    }
-
-    public Boolean existeRotaAtiva(){
-        for (Rota r : routing_table.values()){
-            System.out.println(r.getOrigem());
-            if(r.getEstado()) return true;
-        }
-        return false;
     }
 
 }

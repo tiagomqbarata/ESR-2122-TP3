@@ -4,28 +4,18 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 
 public class Mensagem implements Serializable {
-    private String dados;
-    private String tipo; //r - reconhecimento; ar - ativação de rota; sr - saltos de rota
+    private String tipo;    // r   - reconhecimento;
+                            // ar  - ativação de rota;
+                            // dr  - desativação de rota;
+                            // drC - desativação de rota de um cliente (inclui fecho do socket);
+                            // EEE - representa um erro na mensagem
     private int saltos;
     private InetAddress ipOrigemMensagem;
-    private InetAddress ipDestino;
 
     public Mensagem(String tipo, InetAddress ipOrigemMensagem){
         this.tipo = tipo;
         this.saltos = 1;
         this.ipOrigemMensagem = ipOrigemMensagem;
-    }
-
-    public Mensagem(String tipo, InetAddress ipOrigemMensagem, String dados){
-        this.tipo = tipo;
-        this.saltos = 1;
-        this.ipOrigemMensagem = ipOrigemMensagem;
-        this.dados = dados;
-    }
-
-    public Mensagem(){
-        this.tipo = "EEE";
-        this.saltos = -1;
     }
 
     public Mensagem(byte[] data){
@@ -81,10 +71,6 @@ public class Mensagem implements Serializable {
         this.saltos += 1;
     }
 
-    public int length(){
-        return this.toBytes().length;
-    }
-
     public String getTipo() {
         return tipo;
     }
@@ -97,22 +83,8 @@ public class Mensagem implements Serializable {
         return this.ipOrigemMensagem;
     }
 
-    public InetAddress getIpDestino(){
-        return this.ipDestino;
-    }
-
-    public String getDados(){
-        return this.dados;
-    }
-
     public String toString(){
         return "{ tipo: " + this.tipo + " ; ttl: " + this.saltos + " ipOrigem: " + this.ipOrigemMensagem + " }";
-    }
-
-    byte[] trim(byte[] bytes){
-        int i = bytes.length - 1;
-        while (i >= 0 && bytes[i] == 0) { --i; }
-        return Arrays.copyOf(bytes, i + 1);
     }
 
 }
